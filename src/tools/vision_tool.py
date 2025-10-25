@@ -2,7 +2,7 @@ import base64
 from openai import OpenAI
 from crewai.tools import BaseTool
 
-from src.config import OPENAI_API_KEY
+from config import OPENAI_API_KEY
 
 # Initialize the OpenAI client
 client = OpenAI(api_key=OPENAI_API_KEY)

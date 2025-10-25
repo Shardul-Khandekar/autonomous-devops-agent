@@ -1,5 +1,5 @@
 from crewai import Agent
-from src.tools.vision_tool import vision_tool
+from tools.vision_tool import vision_tool
 
 architect_agent = Agent(
     role="Principal Solutions Architect",

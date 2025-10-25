@@ -1,5 +1,5 @@
 from crewai import Task
-from src.agents.architect import architect_agent
+from agents.architect import architect_agent
 
 analysis_task = Task(
     description=(

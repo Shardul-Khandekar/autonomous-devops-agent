@@ -1,8 +1,8 @@
 import argparse
 from crewai import Crew, Process
 
-from src.agents.architect import architect_agent
-from src.tasks.vision_tasks import analysis_task
+from agents.architect import architect_agent
+from tasks.vision_tasks import analysis_task
 
 
 def run_crew(image_path: str):
@@ -17,7 +17,7 @@ def run_crew(image_path: str):
         agents=[architect_agent],
         tasks=[analysis_task],
         process=Process.sequential,
-        verbose=2
+        verbose=True
     )
 
     # Run the Crew with the provided inputs
