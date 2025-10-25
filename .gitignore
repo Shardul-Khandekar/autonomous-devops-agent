@@ -92,6 +92,7 @@ env/
 env.bak/
 venv.bak/
 venv*/
+devops-agent/
 
 # Environment variables file(s)
 .env
