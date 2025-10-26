@@ -4,6 +4,9 @@ from crewai import Crew, Process
 from agents.architect import architect_agent
 from tasks.vision_tasks import analysis_task
 
+from agents.surveyor import surveyor_agent
+from tasks.query_tasks import query_task
+
 
 def run_crew(image_path: str):
     """
@@ -14,8 +17,8 @@ def run_crew(image_path: str):
 
     # Instantiate the Crew with the tasks module
     autonomous_crew = Crew(
-        agents=[architect_agent],
-        tasks=[analysis_task],
+        agents=[architect_agent, surveyor_agent],
+        tasks=[analysis_task, query_task],
         process=Process.sequential,
         verbose=True
     )
