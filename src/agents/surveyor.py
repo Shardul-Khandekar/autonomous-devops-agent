@@ -1,5 +1,6 @@
 from crewai import Agent
 from tools.user_input_tool import user_input_tool
+from tools.service_question_tool import service_question_tool
 
 surveyor_agent = Agent(
     role="Technical Project Manager",
@@ -13,7 +14,7 @@ surveyor_agent = Agent(
         " engineers have all the information they need before they start"
         " building."
     ),
-    tools=[user_input_tool],
+    tools=[user_input_tool, service_question_tool],
     allow_delegation=False,
     verbose=True
 )
