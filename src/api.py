@@ -77,3 +77,6 @@ async def analyze_diagram(file: UploadFile = File(...)):
         # Clean up the temporary file
         if os.path.exists(temp_file_path):
             os.remove(temp_file_path)
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
