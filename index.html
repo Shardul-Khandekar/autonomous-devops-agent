@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Autonomous DevOps Agent</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background-color: #f4f7f6;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+      }
+      #app {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+      h1 {
+        color: #1a1a1a;
+        text-align: center;
+      }
+      #upload-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+      input[type="file"] {
+        padding: 10px;
+        border: 2px dashed #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button {
+        padding: 12px 20px;
+        font-size: 16px;
+        background-color: #007aff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      #loader {
+        text-align: center;
+        font-size: 18px;
+        padding: 20px;
+        display: none; /* Hidden by default */
+      }
+      .node-container {
+        margin-top: 20px;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        padding: 20px;
+        background: #fafafa;
+      }
+      .node-container h3 {
+        margin-top: 0;
+        color: #0056b3;
+      }
+      .node-container label {
+        display: block;
+        font-weight: 600;
+        margin-top: 10px;
+        margin-bottom: 5px;
+      }
+      .node-container input[type="text"] {
+        width: calc(100% - 20px);
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <h1>Autonomous DevOps Agent</h1>
+
+      <form id="upload-form">
+        <label for="file-input">Upload Architecture Diagram (PNG):</label>
+        <input type="file" id="file-input" accept="image/png" required />
+        <button type="submit">Analyze Diagram</button>
+      </form>
+
+      <div id="loader">Analyzing diagram and generating questions...</div>
+
+      <div id="results-container"></div>
+    </div>
+
+    <script>
+      // Get references to our HTML elements
+      const uploadForm = document.getElementById("upload-form");
+      const fileInput = document.getElementById("file-input");
+      const loader = document.getElementById("loader");
+      const resultsContainer = document.getElementById("results-container");
+
+      // Listen for the form's "submit" event
+      uploadForm.addEventListener("submit", async (event) => {
+        // Prevent the browser from reloading the page
+        event.preventDefault();
+
+        const file = fileInput.files[0];
+        if (!file) {
+          alert("Please select a file first.");
+          return;
+        }
+
+        // Show the loader and clear old results
+        loader.style.display = "block";
+        resultsContainer.innerHTML = "";
+
+        // Create a FormData object to send the file
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+          // Call our FastAPI backend
+          const response = await fetch(
+            "http://127.0.0.1:8000/analyze-diagram",
+            {
+              method: "POST",
+              body: formData,
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log("Received data:", data);
+
+          // Hide the loader
+          loader.style.display = "none";
+
+          // Call our function to render the results
+          renderResults(data);
+        } catch (error) {
+          loader.style.display = "none";
+          resultsContainer.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+          console.error("Error uploading file:", error);
+        }
+      });
+
+      function renderResults(data) {
+        // Clear any previous results
+        resultsContainer.innerHTML = "";
+
+        if (data.error) {
+          resultsContainer.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+          return;
+        }
+
+        // Loop through each node (service) from the API response
+        data.nodes.forEach((node) => {
+          // Create a container for this node
+          const nodeDiv = document.createElement("div");
+          nodeDiv.className = "node-container";
+
+          // Add the title (e.g., "Service: lambda_processor (Type: Lambda)")
+          const title = document.createElement("h3");
+          title.textContent = `Service: ${node.id} (Type: ${node.type})`;
+          nodeDiv.appendChild(title);
+
+          // Check if there are questions for this node
+          if (node.questions && node.questions.length > 0) {
+            // Loop through the questions and create a form
+            node.questions.forEach((question) => {
+              const label = document.createElement("label");
+              label.textContent = question;
+              nodeDiv.appendChild(label);
+
+              const input = document.createElement("input");
+              input.type = "text";
+              input.placeholder = "Your answer...";
+              // We can store the original question in a 'data-' attribute
+              input.dataset.question = question;
+              nodeDiv.appendChild(input);
+            });
+          } else {
+            // If no questions, just say so
+            const noQuestions = document.createElement("p");
+            noQuestions.textContent =
+              "No additional information required for this service.";
+            nodeDiv.appendChild(noQuestions);
+          }
+
+          // Add the new node's form to the results area
+          resultsContainer.appendChild(nodeDiv);
+        });
+      }
+    </script>
+  </body>
+</html>
